@@ -134,7 +134,16 @@ for(let k=0;k<6;k++)programs.push({name:'Sem sinal',draw(){noise(.6);g.fillStyle
 const yt=document.getElementById('yt');
 let lists={};try{lists=JSON.parse(localStorage.getItem('tvlists')||'{}')||{}}catch(e){}
 function ytCmd(f,a){try{yt.contentWindow.postMessage(JSON.stringify({event:'command',func:f,args:a||[]}),'*')}catch(e){}}
-yt.onload=()=>{setVol();setTimeout(setVol,1200)};
+let yerr=0;
+yt.onload=()=>{try{yt.contentWindow.postMessage(JSON.stringify({event:'listening',id:1,channel:'widget'}),'*')}catch(e){}setVol();setTimeout(setVol,1200)};
+addEventListener('message',e=>{
+ if(!/youtube/.test(e.origin))return;
+ let d=e.data;try{if(typeof d==='string')d=JSON.parse(d)}catch(_){return}
+ if(!d||d.event!=='onError')return;
+ const p=lists[ch];yerr++;
+ if(p&&p.type==='list'&&yerr<=10){showOsd('PULANDO...');setTimeout(()=>ytCmd('nextVideo'),700)}
+ else showOsd('INDISPONÍVEL');
+});
 function parseYT(s){s=s.trim();let m=s.match(/[?&]list=([\w-]+)/);if(m)return{type:'list',id:m[1]};
  if(/^(PL|OL|UU|FL|RD)[\w-]{10,}$/.test(s))return{type:'list',id:s};
  m=s.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);if(m)return{type:'video',id:m[1]};
@@ -174,7 +183,7 @@ function setCh(i){
   chn.textContent=String(ch+1).padStart(2,'0');
   const isUser=ch>=programs.length,pl=lists[ch],my=ch;
   yt.hidden=true;yt.src='about:blank';
-  if(pl&&!isUser){vid.pause();vid.hidden=true;setTimeout(()=>{if(power&&ch===my){yt.src=ytUrl(pl);yt.hidden=false}},450)}
+  if(pl&&!isUser){vid.pause();vid.hidden=true;setTimeout(()=>{if(power&&ch===my){yerr=0;yt.src=ytUrl(pl);yt.hidden=false}},450)}
   else if(isUser){vid.src=user[ch-programs.length].url;vid.hidden=false;vid.play().catch(()=>{});vid.onended=()=>setCh(ch+1)}
   else{vid.pause();vid.hidden=true}
   showOsd('CH '+String(ch+1).padStart(2,'0'));
