@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TV da Infância</title>
+<style>
+:root{--bg:#2a1d14;--wood:#6b4426;--wood2:#8a5a33;--panel:#1c1510;--ink:#f3e3c3;--amber:#ffb347;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(ellipse at 50% 30%,#4a3322,var(--bg) 70%);color:var(--ink);font-family:"Trebuchet MS",Verdana,sans-serif;display:flex;flex-direction:column;align-items:center;padding:16px}
+h1{font-family:Georgia,"Times New Roman",serif;font-weight:normal;font-size:clamp(20px,4vw,30px);margin:6px 0 14px;letter-spacing:.5px;text-align:center}
+.tv{width:min(900px,100%);background:linear-gradient(160deg,var(--wood2),var(--wood));border-radius:26px;padding:22px;display:grid;grid-template-columns:1fr 130px;gap:18px;box-shadow:0 30px 60px #000a,inset 0 2px 0 #c9945f55,inset 0 -6px 12px #0006}
+.screenwrap{background:#0a0a0a;border-radius:34px;padding:16px;box-shadow:inset 0 0 20px #000,0 0 0 4px #3a2412}
+.screen{position:relative;aspect-ratio:4/3;border-radius:46px/38px;overflow:hidden;background:#000;box-shadow:inset 0 0 60px #000c}
+[hidden]{display:none!important}
+canvas,video,iframe{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;background:#000;border:0}
+#panel{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+#panel .card{background:var(--panel);border-radius:16px;padding:20px;width:min(640px,100%);max-height:88vh;overflow:auto;box-shadow:0 20px 50px #000}
+#panel h2{font-family:Georgia,serif;font-weight:normal;margin:0 0 6px}
+#panel p{font-size:14px;color:#d8c6a3;margin:0 0 14px;line-height:1.5}
+.row{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;margin-bottom:4px}
+.row input{width:100%;padding:9px;border-radius:8px;border:1px solid #5a4330;background:#2a1f16;color:var(--ink);font:inherit;font-size:14px}
+.row .btn{width:auto;padding:8px 12px}
+.st{grid-column:2/4;font-size:12px;color:var(--amber);min-height:16px;margin-bottom:8px}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
+.actions .btn{width:auto;padding:9px 16px}
+.crt{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,#0000 0 2px,#0003 2px 3px),radial-gradient(ellipse at center,#0000 55%,#000b 100%);mix-blend-mode:multiply}
+.glare{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,#fff3 0,#fff0 28%)}
+.osd{position:absolute;top:7%;right:8%;font:bold clamp(18px,4vw,34px) "Courier New",monospace;color:#5dff6a;text-shadow:2px 2px #003a07,0 0 8px #2f9;opacity:0;transition:opacity .3s;pointer-events:none}
+.osd.on{opacity:1}
+.off .screen::after{content:"";position:absolute;inset:0;background:#000}
+.side{background:var(--panel);border-radius:16px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:inset 0 0 12px #000}
+.knob{width:84px;height:84px;border-radius:50%;border:0;cursor:pointer;background:radial-gradient(circle at 35% 30%,#ddd,#777 60%,#333);box-shadow:0 4px 8px #000a;position:relative;transition:transform .25s}
+.knob::after{content:"";position:absolute;left:50%;top:7px;width:5px;height:22px;margin-left:-2.5px;background:#222;border-radius:3px}
+.lbl{font-size:12px;color:#c9b58f;text-align:center}
+.btn{width:100%;padding:9px 4px;border:0;border-radius:8px;background:#3b2c20;color:var(--ink);font:inherit;font-size:13px;cursor:pointer;box-shadow:0 2px 0 #000}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.led{width:10px;height:10px;border-radius:50%;background:#400;box-shadow:0 0 0 2px #111}
+.on .led,.led.lit{background:#ff3b2f;box-shadow:0 0 8px #f33,0 0 0 2px #111}
+input[type=range]{width:100%;accent-color:var(--amber)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%}
+.grid .btn{padding:8px 0;font-size:15px}
+.grid .btn.cur{background:var(--amber);color:#2a1500}
+.hint{max-width:900px;font-size:14px;line-height:1.55;color:#d8c6a3;margin:18px 6px 6px;text-align:center}
+.hint button{background:none;border:0;color:var(--amber);font:inherit;text-decoration:underline;cursor:pointer;padding:0}
+button:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+@media(max-width:640px){.tv{grid-template-columns:1fr;padding:14px}.side{flex-direction:row;flex-wrap:wrap;justify-content:center}.knob{width:64px;height:64px}.grid{grid-template-columns:repeat(6,1fr);width:auto;flex:1 1 220px}.btn{width:auto;padding:9px 12px}}
+</style>
+</head>
+<body>
+<h1>TV da Infância</h1>
+<div class="tv off" id="tv">
+  <div class="screenwrap"><div class="screen">
+    <canvas id="cv" width="480" height="360"></canvas>
+    <video id="vid" playsinline hidden></video>
+    <iframe id="yt" hidden title="Programa do YouTube" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <div class="crt"></div><div class="glare"></div>
+    <div class="osd" id="osd"></div>
+  </div></div>
+  <div class="side">
+    <div class="led" id="led"></div>
+    <button class="btn" id="pw">Ligar</button>
+    <button class="knob" id="knob" aria-label="Trocar de canal"></button>
+    <div class="lbl">Canal <span id="chn">--</span></div>
+    <div class="grid" id="grid"></div>
+    <div class="lbl">Volume</div>
+    <input type="range" id="vol" min="0" max="100" value="40" aria-label="Volume">
+    <button class="btn" id="prog">Programar canais</button>
+    <button class="btn" id="load">Meus vídeos</button>
+    <input type="file" id="file" accept="video/*" multiple hidden>
+  </div>
+</div>
+<p class="hint">Ligue a TV e gire o botão (ou use as setas ← → do teclado) para mudar de canal. Quer rever os programas de verdade? <button id="load2">Carregue seus próprios vídeos</button> do computador ou celular e eles viram canais extras. Os arquivos ficam só no seu aparelho.</p>
+
+<div id="panel" hidden role="dialog" aria-label="Programar canais"><div class="card"><h2>Programar canais</h2><p>Cole o link de uma playlist (ou de um vídeo) do YouTube em cada canal e aperte Enter. Canais sem link mostram o programa de exemplo. Os links ficam salvos neste navegador.</p><div id="rows"></div><div class="actions"><button class="btn" id="clear">Limpar tudo</button><button class="btn" id="close">Fechar</button></div></div></div>
+<script>
+const cv=document.getElementById('cv'),g=cv.getContext('2d'),W=480,H=360;
+const vid=document.getElementById('vid'),tv=document.getElementById('tv'),osd=document.getElementById('osd');
+const chn=document.getElementById('chn'),grid=document.getElementById('grid');
+let power=false,ch=0,staticUntil=0,t=0,user=[],ac=null,gain=null,noiseNode=null,beep=null,beepGain=null;
+
+const font=(s,w='bold')=>g.font=`${w} ${s}px "Courier New",monospace`;
+const noise=(a=1)=>{const d=g.createImageData(W,H),p=d.data;for(let i=0;i<p.length;i+=4){const v=Math.random()*255*a;p[i]=p[i+1]=p[i+2]=v;p[i+3]=255}g.putImageData(d,0,0)};
+
+const programs=[
+ {name:'Chuvisco',draw(){noise()}},
+ {name:'Barras',draw(){
+  const c=['#c0c0c0','#c0c000','#00c0c0','#00c000','#c000c0','#c00000','#0000c0'];
+  c.forEach((x,i)=>{g.fillStyle=x;g.fillRect(i*W/7,0,W/7+1,H*.7)});
+  const d=['#0000c0','#111','#c000c0','#111','#00c0c0','#111','#c0c0c0'];
+  d.forEach((x,i)=>{g.fillStyle=x;g.fillRect(i*W/7,H*.7,W/7+1,H*.1)});
+  g.fillStyle='#001a4d';g.fillRect(0,H*.8,W,H*.2);
+  g.fillStyle='#fff';font(22);g.textAlign='center';g.fillText('TV INFÂNCIA',W/2,H*.93)}},
+ {name:'Desenho',draw(){
+  const sky=g.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#5ec8ff');sky.addColorStop(1,'#d8f4ff');
+  g.fillStyle=sky;g.fillRect(0,0,W,H);
+  g.fillStyle='#fff';[0,1,2].forEach(i=>{const x=((t*20+i*220)%(W+160))-80,y=50+i*38;[0,28,56].forEach((o,j)=>{g.beginPath();g.arc(x+o,y+(j==1?-10:0),24,0,7);g.fill()})});
+  g.fillStyle='#3fae3f';g.fillRect(0,H*.78,W,H*.22);
+  g.fillStyle='#ff9d00';g.beginPath();g.arc(70,70,28+Math.sin(t*2)*2,0,7);g.fill();
+  const x=((t*90)%(W+80))-40,y=H*.78-Math.abs(Math.sin(t*5))*70;
+  g.fillStyle='#e53935';g.beginPath();g.arc(x,y-24,24,0,7);g.fill();
+  g.fillStyle='#fff';g.beginPath();g.arc(x+9,y-30,8,0,7);g.arc(x-5,y-30,8,0,7);g.fill();
+  g.fillStyle='#000';g.beginPath();g.arc(x+12,y-30,3,0,7);g.arc(x-2,y-30,3,0,7);g.fill();
+  g.fillStyle='#ffe14d';g.fillRect(x-14,y,28,5);
+  g.fillStyle='#1e1e1e';font(24);g.textAlign='center';g.fillText('DESENHO DA MANHÃ',W/2,H*.93)}},
+ {name:'Jornal',draw(){
+  g.fillStyle='#143a7a';g.fillRect(0,0,W,H);
+  g.fillStyle='#0c2757';g.fillRect(0,0,W,50);
+  g.fillStyle='#fff';font(26);g.textAlign='left';g.fillText('JORNAL DA NOITE',16,34);
+  g.fillStyle='#e2e2e2';g.beginPath();g.arc(W/2,150,34,0,7);g.fill();
+  g.fillStyle='#222';g.fillRect(W/2-60,185,120,80);
+  g.fillStyle='#e2e2e2';g.fillRect(W/2-14,180,28,16);
+  g.fillStyle='#fff';g.fillRect(W/2-12,155+Math.sin(t*9)*(Math.sin(t*1.3)>0?3:0),24,3);
+  g.fillStyle='#d9a300';g.fillRect(0,300,W,40);
+  g.fillStyle='#000';font(20);const msg='  Boa noite! Hoje o dia foi de calor e lembrança boa na memória  •  Amanhã tem desenho cedinho  •  Não saia do ar  ';
+  const w=g.measureText(msg).width;g.save();g.translate(-(t*80)%w,0);g.fillText(msg+msg,0,327);g.restore()}},
+ {name:'Sessão',draw(){
+  const pulse=Math.sin(t*3);
+  g.fillStyle='#2a0a3d';g.fillRect(0,0,W,H);
+  for(let i=0;i<14;i++){g.fillStyle=`hsl(${(i*28+t*60)%360} 90% 55%)`;g.beginPath();g.arc(W/2,H/2,230-i*16,0,7);g.fill()}
+  g.fillStyle='#fff';font(40+pulse*3);g.textAlign='center';g.fillText('SESSÃO',W/2,H/2-2);
+  g.fillText('DA TARDE',W/2,H/2+42);
+  g.fillStyle='#000';font(16);g.fillText('(vinheta original)',W/2,H-24)}},
+ {name:'Fora do ar',draw(){
+  g.fillStyle='#000';g.fillRect(0,0,W,H);
+  noise(.35);
+  g.fillStyle='#fff';font(26);g.textAlign='center';g.fillText('FIM DA PROGRAMAÇÃO',W/2,H/2-6);
+  g.font='16px "Courier New",monospace';g.fillText('Boa noite e até amanhã!',W/2,H/2+26);
+  if(Math.floor(t*2)%2){g.fillStyle='#fff';g.fillRect(W/2-6,H/2+50,12,12)}}}
+];
+
+for(let k=0;k<6;k++)programs.push({name:'Sem sinal',draw(){noise(.6);g.fillStyle='#000a';g.fillRect(60,H/2-40,W-120,80);g.fillStyle='#fff';font(20);g.textAlign='center';g.fillText('SEM SINAL',W/2,H/2-6);g.font='14px "Courier New",monospace';g.fillText('Programe este canal no menu',W/2,H/2+22)}});
+const yt=document.getElementById('yt');
+let lists={};try{lists=JSON.parse(localStorage.getItem('tvlists')||'{}')||{}}catch(e){}
+function ytCmd(f,a){try{yt.contentWindow.postMessage(JSON.stringify({event:'command',func:f,args:a||[]}),'*')}catch(e){}}
+yt.onload=()=>{setVol();setTimeout(setVol,1200)};
+function parseYT(s){s=s.trim();let m=s.match(/[?&]list=([\w-]+)/);if(m)return{type:'list',id:m[1]};
+ if(/^(PL|OL|UU|FL|RD)[\w-]{10,}$/.test(s))return{type:'list',id:s};
+ m=s.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);if(m)return{type:'video',id:m[1]};
+ if(/^[\w-]{11}$/.test(s))return{type:'video',id:s};return null}
+function ytUrl(p){const q='autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&loop=1';
+ return p.type==='list'?`https://www.youtube-nocookie.com/embed/videoseries?list=${p.id}&${q}`:`https://www.youtube-nocookie.com/embed/${p.id}?playlist=${p.id}&${q}`}
+function all(){return programs.length+user.length}
+function buildGrid(){
+  grid.innerHTML='';
+  for(let i=0;i<all();i++){const b=document.createElement('button');b.className='btn'+(i===ch?' cur':'');b.textContent=i+1;b.onclick=()=>setCh(i);grid.appendChild(b)}
+}
+function showOsd(txt){osd.textContent=txt;osd.classList.add('on');clearTimeout(showOsd.id);showOsd.id=setTimeout(()=>osd.classList.remove('on'),2200)}
+
+function audioInit(){
+  if(ac)return;
+  ac=new (window.AudioContext||window.webkitAudioContext)();
+  gain=ac.createGain();gain.connect(ac.destination);setVol();
+  const buf=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  noiseNode=ac.createBufferSource();noiseNode.buffer=buf;noiseNode.loop=true;
+  const ng=ac.createGain();ng.gain.value=0;noiseNode.connect(ng);ng.connect(gain);noiseNode.start();noiseNode.ng=ng;
+  beep=ac.createOscillator();beep.frequency.value=1000;beepGain=ac.createGain();beepGain.gain.value=0;
+  beep.connect(beepGain);beepGain.connect(gain);beep.start();
+}
+function setVol(){const v=document.getElementById('vol').value/100;if(gain)gain.gain.value=v*.6;vid.volume=v;ytCmd('setVolume',[Math.round(v*100)])}
+function sound(){
+  if(!ac)return;
+  const now=performance.now()<staticUntil,p=programs[ch];
+  if(lists[ch]&&!now){noiseNode.ng.gain.value=0;beepGain.gain.value=0;return}
+  noiseNode.ng.gain.value=power&&(now||(!user.length||ch<programs.length)&&(p&&(p.name==='Chuvisco'||p.name==='Sem sinal'||p.name==='Fora do ar')))?(p&&p.name==='Fora do ar'&&!now?.15:.5):0;
+  beepGain.gain.value=power&&!now&&ch<programs.length&&p.name==='Barras'?.12:0;
+}
+function setCh(i){
+  if(!power)return;
+  ch=(i+all())%all();
+  staticUntil=performance.now()+450;
+  chn.textContent=String(ch+1).padStart(2,'0');
+  const isUser=ch>=programs.length,pl=lists[ch],my=ch;
+  yt.hidden=true;yt.src='about:blank';
+  if(pl&&!isUser){vid.pause();vid.hidden=true;setTimeout(()=>{if(power&&ch===my){yt.src=ytUrl(pl);yt.hidden=false}},450)}
+  else if(isUser){vid.src=user[ch-programs.length].url;vid.hidden=false;vid.play().catch(()=>{});vid.onended=()=>setCh(ch+1)}
+  else{vid.pause();vid.hidden=true}
+  showOsd('CH '+String(ch+1).padStart(2,'0'));
+  document.getElementById('knob').style.transform=`rotate(${ch*47}deg)`;
+  buildGrid();
+}
+function setPower(on){
+  power=on;tv.classList.toggle('off',!on);tv.classList.toggle('on',on);
+  document.getElementById('pw').textContent=on?'Desligar':'Ligar';
+  document.getElementById('led').classList.toggle('lit',on);
+  if(on){audioInit();ac.resume();ch=Math.max(ch,1)>=all()?1:Math.max(ch,1);setCh(ch)}
+  else{vid.pause();vid.hidden=true;chn.textContent='--';if(noiseNode){noiseNode.ng.gain.value=0;beepGain.gain.value=0}osd.classList.remove('on')}
+}
+document.getElementById('pw').onclick=()=>setPower(!power);
+document.getElementById('knob').onclick=()=>setCh(ch+1);
+document.getElementById('vol').oninput=setVol;
+const pick=()=>document.getElementById('file').click();
+document.getElementById('load').onclick=pick;document.getElementById('load2').onclick=pick;
+document.getElementById('file').onchange=e=>{
+  [...e.target.files].forEach(f=>user.push({name:f.name,url:URL.createObjectURL(f)}));
+  buildGrid();
+  if(user.length){if(!power)setPower(true);setCh(programs.length+user.length-e.target.files.length)}
+  e.target.value='';
+};
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
+  if(e.key==='ArrowRight'||e.key==='ArrowUp')setCh(ch+1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowDown')setCh(ch-1);
+});
+
+let last=performance.now();
+function loop(now){
+  t+=(now-last)/1000;last=now;
+  if(power){
+    const switching=now<staticUntil;
+    if(ch<programs.length||switching){
+      if(vid.hidden||switching)vid.hidden=switching||ch<programs.length;
+      g.save();g.textBaseline='alphabetic';
+      if(switching)noise();else programs[ch].draw();
+      if(!switching&&Math.random()<.04){g.fillStyle='#fff2';g.fillRect(0,Math.random()*H,W,3+Math.random()*6)}
+      g.restore();
+    }else if(vid.hidden){vid.hidden=false}
+    if(switching&&ch>=programs.length)vid.hidden=true;
+    if(!switching&&ch>=programs.length&&user.length)vid.hidden=false;
+  }else{
+    g.fillStyle='#000';g.fillRect(0,0,W,H);
+  }
+  sound();
+  requestAnimationFrame(loop);
+}
+const panel=document.getElementById('panel'),rows=document.getElementById('rows');
+function save(){try{localStorage.setItem('tvlists',JSON.stringify(lists))}catch(e){}}
+function renderRows(){
+ rows.innerHTML='';
+ programs.forEach((p,i)=>{
+  const n=document.createElement('b');n.textContent=String(i+1).padStart(2,'0');
+  const inp=document.createElement('input');inp.type='text';inp.value=lists[i]?lists[i].raw:'';
+  inp.placeholder=(p.name==='Sem sinal'?'Canal livre':p.name)+' - link do YouTube';inp.setAttribute('aria-label','Canal '+(i+1));
+  const go=document.createElement('button');go.className='btn';go.textContent='Ver';
+  const st=document.createElement('span');st.className='st';
+  const show=()=>{st.textContent=lists[i]?(lists[i].type==='list'?'Playlist reconhecida':'Vídeo reconhecido'):''};show();
+  inp.onchange=()=>{const v=inp.value.trim();
+   if(!v){delete lists[i];st.textContent=''}
+   else{const r=parseYT(v);if(r){lists[i]={raw:v,...r};show()}else{delete lists[i];st.textContent='Link não reconhecido. Use o endereço da playlist ou do vídeo.'}}
+   save();if(power&&ch===i)setCh(i)};
+  go.onclick=()=>{panel.hidden=true;if(!power)setPower(true);setCh(i)};
+  const r=document.createElement('div');r.className='row';r.append(n,inp,go,st);rows.append(r);
+ });
+}
+document.getElementById('prog').onclick=()=>{renderRows();panel.hidden=false};
+document.getElementById('close').onclick=()=>{panel.hidden=true};
+document.getElementById('clear').onclick=()=>{lists={};save();renderRows();if(power)setCh(ch)};
+panel.addEventListener('click',e=>{if(e.target===panel)panel.hidden=true});
+buildGrid();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
