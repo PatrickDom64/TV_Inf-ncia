@@ -62,3 +62,4 @@ Este projeto não hospeda nem distribui nenhum programa de TV. Os vídeos tocam 
 ---
 
 Feito com carinho e muita nostalgia. 🌈
+<img width="887" height="856" alt="image" src="https://github.com/user-attachments/assets/590365ae-22c3-493a-a0ef-e772b0fec6a8" />
