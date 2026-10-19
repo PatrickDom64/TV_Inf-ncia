@@ -10,17 +10,19 @@
 html,body{margin:0;min-height:100%}
 body{background:radial-gradient(ellipse at 50% 30%,#4a3322,var(--bg) 70%);color:var(--ink);font-family:"Trebuchet MS",Verdana,sans-serif;display:flex;flex-direction:column;align-items:center;padding:16px}
 h1{font-family:Georgia,"Times New Roman",serif;font-weight:normal;font-size:clamp(20px,4vw,30px);margin:6px 0 14px;letter-spacing:.5px;text-align:center}
-.tv{width:min(900px,100%);background:linear-gradient(160deg,var(--wood2),var(--wood));border-radius:26px;padding:22px;display:grid;grid-template-columns:1fr 130px;gap:18px;box-shadow:0 30px 60px #000a,inset 0 2px 0 #c9945f55,inset 0 -6px 12px #0006}
-.screenwrap{background:#0a0a0a;border-radius:34px;padding:16px;box-shadow:inset 0 0 20px #000,0 0 0 4px #3a2412}
-.screen{position:relative;aspect-ratio:4/3;border-radius:46px/38px;overflow:hidden;background:#000;box-shadow:inset 0 0 60px #000c}
+.tv{width:min(860px,100%);display:flex;flex-direction:column;align-items:center;gap:14px}
+.tvframe{position:relative;width:100%;aspect-ratio:854/639;filter:drop-shadow(0 24px 30px #000a)}
+.tvframe>img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none}
+
+.screen{position:absolute;left:14.75%;top:8.3%;width:70.96%;height:71.05%;overflow:hidden;border-radius:2.2%/2.9%;background:#000;box-shadow:inset 0 0 40px #000c}
 [hidden]{display:none!important}
 canvas,video,iframe{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;background:#000;border:0}
-#panel{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
-#panel .card{background:var(--panel);border-radius:16px;padding:20px;width:min(640px,100%);max-height:88vh;overflow:auto;box-shadow:0 20px 50px #000}
-#panel h2{font-family:Georgia,serif;font-weight:normal;margin:0 0 6px}
-#panel p{font-size:14px;color:#d8c6a3;margin:0 0 14px;line-height:1.5}
+#panel,#bgpanel{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+#panel .card,#bgpanel .card{background:var(--panel);border-radius:16px;padding:20px;width:min(640px,100%);max-height:88vh;overflow:auto;box-shadow:0 20px 50px #000}
+#panel h2,#bgpanel h2{font-family:Georgia,serif;font-weight:normal;margin:0 0 6px}
+#panel p,#bgpanel p{font-size:14px;color:#d8c6a3;margin:0 0 14px;line-height:1.5}
 .row{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;margin-bottom:4px}
-.row input{width:100%;padding:9px;border-radius:8px;border:1px solid #5a4330;background:#2a1f16;color:var(--ink);font:inherit;font-size:14px}
+.row input,.row2 input{width:100%;padding:9px;border-radius:8px;border:1px solid #5a4330;background:#2a1f16;color:var(--ink);font:inherit;font-size:14px}
 .row .btn{width:auto;padding:8px 12px}
 .st{grid-column:2/4;font-size:12px;color:var(--amber);min-height:16px;margin-bottom:8px}
 .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
@@ -30,28 +32,56 @@ canvas,video,iframe{position:absolute;inset:0;width:100%;height:100%;display:blo
 .osd{position:absolute;top:7%;right:8%;font:bold clamp(18px,4vw,34px) "Courier New",monospace;color:#5dff6a;text-shadow:2px 2px #003a07,0 0 8px #2f9;opacity:0;transition:opacity .3s;pointer-events:none}
 .osd.on{opacity:1}
 .off .screen::after{content:"";position:absolute;inset:0;background:#000}
-.side{background:var(--panel);border-radius:16px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:inset 0 0 12px #000}
-.knob{width:84px;height:84px;border-radius:50%;border:0;cursor:pointer;background:radial-gradient(circle at 35% 30%,#ddd,#777 60%,#333);box-shadow:0 4px 8px #000a;position:relative;transition:transform .25s}
+.side{background:var(--panel);border-radius:16px;padding:14px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;box-shadow:inset 0 0 12px #000;width:100%}
+.knob{width:60px;height:60px;border-radius:50%;border:0;cursor:pointer;background:radial-gradient(circle at 35% 30%,#ddd,#777 60%,#333);box-shadow:0 4px 8px #000a;position:relative;transition:transform .25s}
 .knob::after{content:"";position:absolute;left:50%;top:7px;width:5px;height:22px;margin-left:-2.5px;background:#222;border-radius:3px}
 .lbl{font-size:12px;color:#c9b58f;text-align:center}
-.btn{width:100%;padding:9px 4px;border:0;border-radius:8px;background:#3b2c20;color:var(--ink);font:inherit;font-size:13px;cursor:pointer;box-shadow:0 2px 0 #000}
+.btn{width:auto;padding:9px 14px;border:0;border-radius:8px;background:#3b2c20;color:var(--ink);font:inherit;font-size:13px;cursor:pointer;box-shadow:0 2px 0 #000}
 .btn:active{transform:translateY(2px);box-shadow:none}
 .led{width:10px;height:10px;border-radius:50%;background:#400;box-shadow:0 0 0 2px #111}
 .on .led,.led.lit{background:#ff3b2f;box-shadow:0 0 8px #f33,0 0 0 2px #111}
-input[type=range]{width:100%;accent-color:var(--amber)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%}
+input[type=range]{width:120px;accent-color:var(--amber)}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;flex:1 1 260px;max-width:420px}
 .grid .btn{padding:8px 0;font-size:15px}
 .grid .btn.cur{background:var(--amber);color:#2a1500}
 .hint{max-width:900px;font-size:14px;line-height:1.55;color:#d8c6a3;margin:18px 6px 6px;text-align:center}
 .hint button{background:none;border:0;color:var(--amber);font:inherit;text-decoration:underline;cursor:pointer;padding:0}
 button:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
-@media(max-width:640px){.tv{grid-template-columns:1fr;padding:14px}.side{flex-direction:row;flex-wrap:wrap;justify-content:center}.knob{width:64px;height:64px}.grid{grid-template-columns:repeat(6,1fr);width:auto;flex:1 1 220px}.btn{width:auto;padding:9px 12px}}
+@media(max-width:640px){.side{padding:10px;gap:8px}.knob{width:50px;height:50px}.grid{flex-basis:100%;max-width:none}.osd{font-size:14px}}
+h1{text-shadow:0 2px 8px #000}
+.hint{background:#000a;border-radius:12px;padding:12px 16px}
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.sw{height:54px;border-radius:10px;border:2px solid #5a4330;cursor:pointer;padding:0}
+.sw.cur{border-color:var(--amber)}
+.row2{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:4px}
+#bgst{font-size:12px;color:var(--amber);min-height:18px;margin:4px 0}
+.tvframe .body{position:absolute;left:0;right:0;top:0;height:93.5%;border-radius:1.4%/1.9%;background:linear-gradient(180deg,#e6e7e9 0,#c6c7ca 10%,#b5b6ba 70%,#a2a3a7 100%);box-shadow:inset 0 0 0 2px #7b7c80,inset 0 3px 3px #fffa,inset 0 -5px 8px #0004}
+.tvframe .spk{position:absolute;top:3.4%;height:84%;width:8.4%;border-radius:4px;background:repeating-linear-gradient(0deg,#0000 0 7px,#0002 7px 8px),linear-gradient(90deg,#cbccd0,#b0b1b5);box-shadow:inset 0 0 0 1px #8e8f93,inset 0 2px 2px #fff8}
+.tvframe .spk.l{left:1.3%}.tvframe .spk.r{left:90.3%}
+.tvframe .bezel{position:absolute;left:11.4%;top:3.4%;width:77.2%;height:81.8%;border-radius:1%/1.4%;background:linear-gradient(180deg,#303134,#1c1d1f);box-shadow:0 2px 0 #fff7,0 0 0 2px #6c6d71,inset 0 4px 10px #000c}
+.tvframe .screen{box-shadow:inset 0 0 40px #000c,0 0 0 2px #0a0a0b,0 0 0 5px #2b2c2f}
+.tvframe .brand{position:absolute;left:50%;top:80.6%;transform:translateX(-50%);font:bold clamp(7px,1.7vw,15px) Arial,Helvetica,sans-serif;letter-spacing:.2em;color:#e9e9eb;text-shadow:0 1px 0 #000}
+.tvframe .neck{position:absolute;left:30%;width:40%;top:92.5%;height:4%;background:linear-gradient(90deg,#8d8e92,#c9cacd,#8d8e92)}
+.tvframe .base{position:absolute;left:10.5%;width:78%;top:95.5%;height:4.5%;border-radius:3px 3px 8px 8px;background:linear-gradient(180deg,#d9dadd,#b3b4b8 55%,#8e8f93);box-shadow:inset 0 2px 0 #fffb,0 3px 4px #0008}
+.tvframe .fbtns{position:absolute;left:46.5%;top:89.3%;display:flex;gap:1.3%;width:9%}
+.tvframe .fb{flex:1;aspect-ratio:1;border-radius:50%;border:0;padding:0;background:radial-gradient(circle at 35% 30%,#a6a7ab,#505155);box-shadow:0 1px 0 #fffa,inset 0 -1px 2px #0008;cursor:pointer}
+.tvframe .fb:active,.tvframe .fpw:active{transform:translateY(1px)}
+.tvframe .ir{position:absolute;left:73.6%;top:89.8%;width:1%;aspect-ratio:1;border-radius:50%;background:#5a1a1a;box-shadow:0 0 0 1px #77787c}
+.on .tvframe .ir{background:#ff3b2f;box-shadow:0 0 6px #f33,0 0 0 1px #77787c}
+.tvframe .fpw{position:absolute;left:76.6%;top:88.6%;width:2.2%;aspect-ratio:1;border-radius:50%;border:0;padding:0;background:radial-gradient(circle at 35% 30%,#b8b9bd,#606165);box-shadow:0 1px 0 #fffa,inset 0 -1px 2px #0008;cursor:pointer}
+.tvframe .port{position:absolute;left:83.1%;top:88.3%;width:3.8%;height:3.6%;background:#1b1b1d;border:2px solid #8e8f93;border-radius:3px;box-shadow:inset 0 0 0 2px #cfd0d3}
 </style>
 </head>
 <body>
 <h1>TV da Infância</h1>
 <div class="tv off" id="tv">
-  <div class="screenwrap"><div class="screen">
+  <div class="tvframe"><div class="body"></div>
+    <div class="spk l"></div><div class="spk r"></div>
+    <div class="bezel"></div>
+    <div class="brand">INFÂNCIA</div>
+    <div class="neck"></div><div class="base"></div>
+    <div class="fbtns"><i class="fb"></i><i class="fb"></i><i class="fb"></i><i class="fb"></i><button class="fb" id="fm" aria-label="Canal anterior"></button><button class="fb" id="fp" aria-label="Próximo canal"></button></div>
+    <i class="ir"></i><div class="port"></div><button class="fpw" id="fpw" aria-label="Ligar ou desligar"></button><div class="screen">
     <canvas id="cv" width="480" height="360"></canvas>
     <video id="vid" playsinline hidden></video>
     <iframe id="yt" hidden title="Programa do YouTube" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -66,6 +96,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-
     <div class="grid" id="grid"></div>
     <div class="lbl">Volume</div>
     <input type="range" id="vol" min="0" max="100" value="40" aria-label="Volume">
+    <button class="btn" id="bgbtn">Plano de fundo</button>
     <button class="btn" id="prog">Programar canais</button>
     <button class="btn" id="load">Meus vídeos</button>
     <input type="file" id="file" accept="video/*" multiple hidden>
@@ -74,6 +105,12 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-
 <p class="hint">Ligue a TV e gire o botão (ou use as setas ← → do teclado) para mudar de canal. Quer rever os programas de verdade? <button id="load2">Carregue seus próprios vídeos</button> do computador ou celular e eles viram canais extras. Os arquivos ficam só no seu aparelho.</p>
 
 <div id="panel" hidden role="dialog" aria-label="Programar canais"><div class="card"><h2>Programar canais</h2><p>Cole o link de uma playlist (ou de um vídeo) do YouTube em cada canal e aperte Enter. Canais sem link mostram o programa de exemplo. Os links ficam salvos neste navegador.</p><div id="rows"></div><div class="actions"><button class="btn" id="clear">Limpar tudo</button><button class="btn" id="close">Fechar</button></div></div></div>
+<div id="bgpanel" hidden role="dialog" aria-label="Plano de fundo"><div class="card"><h2>Plano de fundo</h2><p>Escolha um fundo pronto, envie uma imagem do seu aparelho ou cole o endereço de uma imagem.</p>
+<div class="swatches" id="sw"></div>
+<div class="row2"><input id="bgurl" type="text" placeholder="https://... endereço da imagem" aria-label="Endereço da imagem"><button class="btn" id="bgapply">Usar</button></div>
+<div id="bgst"></div>
+<div class="actions"><button class="btn" id="bgfile">Enviar imagem</button><button class="btn" id="bgreset">Restaurar</button><button class="btn" id="bgclose">Fechar</button></div>
+<input type="file" id="bgfileinp" accept="image/*" hidden></div></div>
 <script>
 const cv=document.getElementById('cv'),g=cv.getContext('2d'),W=480,H=360;
 const vid=document.getElementById('vid'),tv=document.getElementById('tv'),osd=document.getElementById('osd');
@@ -256,6 +293,46 @@ document.getElementById('prog').onclick=()=>{renderRows();panel.hidden=false};
 document.getElementById('close').onclick=()=>{panel.hidden=true};
 document.getElementById('clear').onclick=()=>{lists={};save();renderRows();if(power)setCh(ch)};
 panel.addEventListener('click',e=>{if(e.target===panel)panel.hidden=true});
+const PRESETS=[
+ {n:'Madeira',css:'radial-gradient(ellipse at 50% 30%,#4a3322,#2a1d14 70%)'},
+ {n:'Azul',css:'radial-gradient(ellipse at 50% 30%,#2b4a6b,#0f1d2e 75%)'},
+ {n:'Listrado',css:'linear-gradient(#0003,#0007),repeating-linear-gradient(90deg,#8b3a3a 0 28px,#7a3030 28px 56px)'},
+ {n:'Bolinhas',css:'radial-gradient(#e9c46a 3px,transparent 4px) 0 0/36px 36px,#264653'}];
+let bg=null;try{bg=JSON.parse(localStorage.getItem('tvbg')||'null')}catch(e){}
+const bgpanel=document.getElementById('bgpanel'),bgst=document.getElementById('bgst'),sw=document.getElementById('sw');
+function applyBg(){
+ document.body.style.background='';
+ if(bg&&bg.k==='p'&&PRESETS[bg.i])document.body.style.background=PRESETS[bg.i].css;
+ else if(bg&&bg.k==='i')document.body.style.background=`url(${JSON.stringify(bg.src)}) center/cover no-repeat fixed #000`;
+ [...sw.children].forEach((b,i)=>b.classList.toggle('cur',!!bg&&bg.k==='p'&&bg.i===i||!bg&&i===0));
+}
+function saveBg(){try{localStorage.setItem('tvbg',JSON.stringify(bg));return true}catch(e){return false}}
+PRESETS.forEach((p,i)=>{const b=document.createElement('button');b.className='sw';b.style.background=p.css;b.title=p.n;b.setAttribute('aria-label','Fundo '+p.n);
+ b.onclick=()=>{bg=i?{k:'p',i}:null;saveBg();applyBg();bgst.textContent=''};sw.append(b)});
+function useImage(src,remember){
+ const im=new Image();
+ im.onload=()=>{bg={k:'i',src};applyBg();bgst.textContent=saveBg()?'Fundo aplicado.':'Fundo aplicado, mas é grande demais para ficar salvo.'};
+ im.onerror=()=>{bgst.textContent='Não foi possível carregar essa imagem. Confira o endereço ou envie o arquivo.'};
+ im.src=src;
+}
+document.getElementById('bgapply').onclick=()=>{const v=document.getElementById('bgurl').value.trim();if(!/^https?:\/\//i.test(v)){bgst.textContent='Cole um endereço que comece com http:// ou https://';return}useImage(v)};
+document.getElementById('bgurl').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('bgapply').click()});
+document.getElementById('bgfile').onclick=()=>document.getElementById('bgfileinp').click();
+document.getElementById('bgfileinp').onchange=e=>{
+ const f=e.target.files[0];e.target.value='';if(!f)return;
+ const url=URL.createObjectURL(f),im=new Image();
+ im.onload=()=>{const k=Math.min(1,1920/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+  c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(url);useImage(c.toDataURL('image/jpeg',.82))};
+ im.onerror=()=>{bgst.textContent='Esse arquivo não parece ser uma imagem.'};im.src=url;
+};
+document.getElementById('bgreset').onclick=()=>{bg=null;saveBg();applyBg();bgst.textContent='Fundo original restaurado.'};
+document.getElementById('bgbtn').onclick=()=>{bgpanel.hidden=false};
+document.getElementById('bgclose').onclick=()=>{bgpanel.hidden=true};
+bgpanel.addEventListener('click',e=>{if(e.target===bgpanel)bgpanel.hidden=true});
+document.getElementById('fpw').onclick=()=>document.getElementById('pw').click();
+document.getElementById('fp').onclick=()=>setCh(ch+1);
+document.getElementById('fm').onclick=()=>setCh(ch-1);
+applyBg();
 buildGrid();requestAnimationFrame(loop);
 </script>
 </body>
